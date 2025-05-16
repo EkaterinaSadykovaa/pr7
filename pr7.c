@@ -5,12 +5,32 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define MAX_LINE_LENGTH 1024
 #define PATH_MAX 4096
 
+int is_whole_word(const char *line, const char *word) {
+    char *token;
+    char *line_copy = strdup(line); // Создаем копию строки для разбивки на слова
+    int found = 0;
+
+    token = strtok(line_copy, " \t\n"); // Разбиваем строку на слова
+
+    while (token != NULL) {
+        if (strcmp(token, word) == 0) { // Сравниваем с целым словом
+            found = 1;
+            break;
+        }
+        token = strtok(NULL, " \t\n"); // Переходим к следующему слову
+    }
+
+    free(line_copy); // Освобождаем память
+    return found;
+}
+
 void search_in_file(const char *file_path, const char *word, int *found_any) {
-      FILE *file = fopen(file_path, "r");
+    FILE *file = fopen(file_path, "r");
     if (!file) {
         perror("Ошибка открытия файла");
         return;
@@ -22,7 +42,7 @@ void search_in_file(const char *file_path, const char *word, int *found_any) {
 
     while (fgets(line, sizeof(line), file)) {
         line_number++;
-        if (strstr(line, word)) {
+        if (is_whole_word(line, word)) {
             printf("Найдено в файле: %s, строка %d: %s", file_path, line_number, line);
             found = 1; 
         }
@@ -63,8 +83,7 @@ void search_in_directory(const char *dir_path, const char *word, int *found_any)
 }
 
 int main(int argc, char *argv[]) {
-    const char *default_directory = "/home/user/2sem/pr7/home";
-    const char *directory = default_directory;
+    const char *directory = NULL;
     const char *word = NULL;
 
     if (argc > 1) {
@@ -74,10 +93,12 @@ int main(int argc, char *argv[]) {
         word = argv[2];
     } else {
         fprintf(stderr, "Не указано слово для поиска или директория.\n");
+        return 1;
     }
 
     if (access(directory, F_OK) != 0) {
         fprintf(stderr, "Указанная директория не существует: %s\n", directory);
+        return 1;
     }
 
     int found_any = 0;
@@ -88,5 +109,6 @@ int main(int argc, char *argv[]) {
     } else {
         printf("Слово \"%s\" не найдено ни в одном файле.\n", word);
     }
+    return 0;
 }
 
