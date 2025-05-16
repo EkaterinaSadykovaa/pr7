@@ -12,20 +12,20 @@
 
 int is_whole_word(const char *line, const char *word) {
     char *token;
-    char *line_copy = strdup(line); // Создаем копию строки для разбивки на слова
+    char *line_copy = strdup(line);
     int found = 0;
 
-    token = strtok(line_copy, " \t\n"); // Разбиваем строку на слова
+    token = strtok(line_copy, " \t\n"); 
 
     while (token != NULL) {
-        if (strcmp(token, word) == 0) { // Сравниваем с целым словом
+        if (strcmp(token, word) == 0) { 
             found = 1;
             break;
         }
-        token = strtok(NULL, " \t\n"); // Переходим к следующему слову
+        token = strtok(NULL, " \t\n"); 
     }
 
-    free(line_copy); // Освобождаем память
+    free(line_copy); 
     return found;
 }
 
